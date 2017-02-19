@@ -22,6 +22,9 @@ static void bluetooth_callback(bool connected) {
 static void battery_callback(BatteryChargeState state) {
   // Record the new battery level
   s_battery_level = state.charge_percent;
+  static char buffer[] = "000";
+  snprintf(buffer, sizeof(buffer), "%d", s_battery_level);
+  text_layer_set_text(s_battery_layer, buffer);
 }
 
 static void update_time() {
@@ -39,13 +42,6 @@ static void update_time() {
   static char date_buffer[16];
   strftime(date_buffer, sizeof(date_buffer), "%d.%m.%y", tick_time);
   text_layer_set_text(s_date_layer, date_buffer);
-}
-
-static void battery_update_proc(TextLayer *layer, GContext *ctx) {
-  // Find the width of the bar
-  static char buffer[] = "000";
-  snprintf(buffer, sizeof(buffer), "%d", s_battery_level);
-  text_layer_set_text(layer, buffer);
 }
 
 static void tick_handler(struct tm *tick_time, TimeUnits units_changed) {
@@ -67,12 +63,12 @@ static void main_window_load(Window *window) {
   layer_add_child(window_get_root_layer(window), text_layer_get_layer(s_time_layer));
   
   // Create date TextLayer
-  s_date_layer = text_layer_create(GRect(0, 100, 145, 30));
+  s_date_layer = text_layer_create(GRect(0, 95, 145, 30));
   text_layer_set_text_color(s_date_layer, GColorFromHEX(0x039941));
   text_layer_set_background_color(s_date_layer, GColorBlack);
   text_layer_set_text_alignment(s_date_layer, GTextAlignmentCenter);
   text_layer_set_text(s_date_layer, "01.01.2016");
-  text_layer_set_font(s_date_layer, fonts_get_system_font(FONT_KEY_GOTHIC_24_BOLD));
+  text_layer_set_font(s_date_layer, fonts_get_system_font(FONT_KEY_GOTHIC_18_BOLD));
   layer_add_child(window_get_root_layer(window), text_layer_get_layer(s_date_layer));
 
   // Create battery meter Layer
@@ -95,7 +91,7 @@ static void main_window_load(Window *window) {
   // Initialize the display
   update_time();
   battery_callback(battery_state_service_peek());
-
+    
   bluetooth_callback(connection_service_peek_pebble_app_connection());
 }
 
